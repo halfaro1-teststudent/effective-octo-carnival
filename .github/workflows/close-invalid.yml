@@ -1,0 +1,38 @@
+name: Close issue/PR on adding invalid label
+
+# **What it does**: This action closes invalid pull requests in the open-source repository.
+# **Why we have it**: We get lots of spam in the open-source repository.
+# **Who does it impact**: Open-source contributors.
+
+on:
+  issues:
+    types: [labeled]
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  close-on-adding-invalid-label:
+    if: github.repository == 'hectorsector/effective-octo-carnival' && github.event.label.name == 'invalid'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Close issue
+        if: ${{ github.event_name == 'issues' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh issue close ${{ github.event.issue.html_url }}
+
+      - name: Close PR
+        if: ${{ github.event_name == 'pull_request_target' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr close ${{ github.event.pull_request.html_url }}
+
+      - name: Check out repo
+        if: ${{ failure() && github.event_name != 'pull_request_target' }}
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
